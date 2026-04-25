@@ -132,8 +132,9 @@ Pattern size is visualized using node size.
 
 ## 📚 Reference
 
-Based on the PaNDa+ approach for approximate pattern mining in RDF graphs.
-
+Summarizing linked data RDF graphs using approximate graph pattern mining
+Authors
+Mussab Zneika, Claudio Lucchese, Dan Vodislav, Dimitris Kotzinos
 ---
 
 ## 👨‍💻 Author
