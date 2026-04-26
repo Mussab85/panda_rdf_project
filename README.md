@@ -100,15 +100,12 @@ All parameters are controlled from the **Streamlit sidebar**.
 
 ---
 
-### 🔹 `lambda` — Complexity Penalty (⚠️ Not used in paper mode)
+### 🔹 `lambda` — Complexity Penalty 
 
-* **Description**: Controls trade-off between pattern size and noise (used in extended versions)
+* **Description**: Controls trade-off between pattern size and noise 
 * **Type**: Float
 * **Default**: `1.0`
 * **Note**:
-
-  * In the **pure PaNDa+ (paper implementation)**, this parameter is **not used**
-  * Included for compatibility with extended versions
 
 ---
 
