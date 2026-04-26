@@ -24,7 +24,7 @@ It allows you to:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/Mussab85/panda-rdf-project.git
+git clone https://github.com/Mussab85/panda_rdf_project)
 cd panda-rdf-project
 ```
 
