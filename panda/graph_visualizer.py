@@ -1,99 +1,113 @@
 from pyvis.network import Network
-import numpy as np
 import math
-import os
-import webbrowser
 
 
-def visualize_graph(summary_graph, patterns, predicate_labels, subject_labels, pattern_nodes):
+def clean(uri):
+    uri = str(uri)
+    for sep in ['#', '/', ':']:
+        if sep in uri:
+            uri = uri.split(sep)[-1]
+    return uri
 
-    net = Network(height="800px", width="100%", directed=True)
 
-    added_nodes = set()
+def visualize_rdf_graph(g):
+
+    net = Network(
+        height="750px",
+        width="100%",
+        bgcolor="#f5f7fa",
+        font_color="#222222"
+    )
 
     # =========================
-    # STEP 1 — DETECT CLASS NODES
+    # PRECOMPUTE DEGREE
     # =========================
-    class_nodes = set()
+    node_sizes = {}
 
-    for s, p, o in summary_graph:
-        if "type" in str(p):
-            class_nodes.add(str(o))
+    for s, p, o in g:
+        node_sizes[str(s)] = node_sizes.get(str(s), 0) + 1
+        node_sizes[str(o)] = node_sizes.get(str(o), 0) + 1
 
     # =========================
-    # STEP 2 — ADD NODES
+    # ADD NODES (FORCE LABELS)
     # =========================
-    for s, p, o in summary_graph:
+    added = set()
+
+    for s, p, o in g:
 
         for node in [s, o]:
 
             node_str = str(node)
 
-            if node_str in added_nodes:
+            if node_str in added:
                 continue
 
-            label = node_str.split("/")[-1]
+            added.add(node_str)
 
-            # -------------------------
-            # PATTERN NODE (SIZE = EXTENT)
-            # -------------------------
-            if "pattern/" in node_str:
+            label = clean(node_str)
+            size = 15 + 8 * math.log1p(node_sizes[node_str])
 
-                idx = int(node_str.split("/")[-1])
-                subjects = np.flatnonzero(patterns[idx].transactions)
+            color = "#4e79a7" if "pattern" in node_str else "#59a14f"
 
-                size = int(10 + min(40, math.log(len(subjects) + 1) * 5))
-
-                net.add_node(
-                    node_str,
-                    label=f"P{idx+1}",
-                    title=f"Subjects: {len(subjects)}",
-                    color="red",
-                    size=size
-                )
-
-            # -------------------------
-            # CLASS NODE
-            # -------------------------
-            elif node_str in class_nodes:
-
-                net.add_node(
-                    node_str,
-                    label=label,
-                    color="purple",
-                    size=30
-                )
-
-            # -------------------------
-            # OTHER NODE
-            # -------------------------
-            else:
-                net.add_node(
-                    node_str,
-                    label=label,
-                    color="blue",
-                    size=10
-                )
-
-            added_nodes.add(node_str)
+            net.add_node(
+                node_str,
+                label=label,
+                title=label,
+                size=size,
+                color=color,
+                font={
+                    "size": 18,
+                    "color": "#222222",
+                    "face": "arial"
+                }
+            )
 
     # =========================
-    # STEP 3 — ADD EDGES
+    # ADD EDGES (LABEL ON HOVER ✔)
     # =========================
-    for s, p, o in summary_graph:
+    for s, p, o in g:
 
-        s_str = str(s)
-        o_str = str(o)
-        p_label = str(p).split("/")[-1]
-
-        net.add_edge(s_str, o_str, label=p_label)
+        net.add_edge(
+            str(s),
+            str(o),
+            title=clean(p),   # 👈 SHOW ON HOVER (better than inline)
+            color="#999999",
+            width=2
+        )
 
     # =========================
-    # STEP 4 — SAVE + OPEN
+    # OPTIONS (KEY FIX)
     # =========================
-    os.makedirs("output", exist_ok=True)
+    net.set_options("""
+    var options = {
+      "nodes": {
+        "font": {
+          "size": 18,
+          "color": "#222222",
+          "face": "arial"
+        }
+      },
+      "edges": {
+        "font": {
+          "size": 14,
+          "align": "middle"
+        }
+      },
+      "physics": {
+        "barnesHut": {
+          "gravitationalConstant": -3000,
+          "centralGravity": 0.1,
+          "springLength": 200,
+          "springConstant": 0.02,
+          "damping": 0.2
+        }
+      },
+      "interaction": {
+        "hover": true,
+        "tooltipDelay": 100,
+        "navigationButtons": true
+      }
+    }
+    """)
 
-    path = "output/graph.html"
-    net.save_graph(path)
-
-    webbrowser.open("graph.html")
+    net.save_graph("output/rdf_graph.html")

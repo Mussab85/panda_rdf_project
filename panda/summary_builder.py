@@ -5,10 +5,17 @@ BC = Namespace("http://example.org/bc#")
 RDF_TYPE = URIRef("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 
 
+def clean_label(label):
+    label = str(label)
+
+    for sep in ['#', '/', ':']:
+        if sep in label:
+            label = label.split(sep)[-1]
+
+    return label.strip()
+
+
 def build_summary(patterns, predicate_labels):
-    """
-    Build RDF summary graph from patterns
-    """
 
     g = Graph()
     g.bind("bc", BC)
@@ -20,19 +27,17 @@ def build_summary(patterns, predicate_labels):
     # =========================
     for i, p in enumerate(patterns):
 
-        pattern_node = URIRef(f"http://example.org/pattern/{i}")
+        pattern_node = URIRef(f"http://example.org/pattern{i}")
         pattern_nodes.append(pattern_node)
 
         subjects = np.flatnonzero(p.transactions)
         extent_value = len(subjects)
 
-        # 🔥 unique extent node per pattern
-        extent_node = URIRef(f"http://example.org/pattern/{i}/extent")
-
-       
+        # ✔ Add extent
+        g.add((pattern_node, BC.extent, Literal(extent_value)))
 
     # =========================
-    # STEP 2 — ADD ITEMS (IMPORTANT)
+    # STEP 2 — ADD ITEMS
     # =========================
     for i, p in enumerate(patterns):
 
@@ -41,28 +46,29 @@ def build_summary(patterns, predicate_labels):
 
         for item in items:
 
-            label = predicate_labels[item]
+            raw_label = predicate_labels[item]
 
             # -------------------------
             # TYPE (::C)
             # -------------------------
-            if label.endswith("::C"):
-                uri = label.replace("::C", "")
+            if str(raw_label).endswith("::C"):
+                uri = str(raw_label).replace("::C", "")
                 g.add((pattern_node, RDF_TYPE, URIRef(uri)))
 
             # -------------------------
             # REVERSE (::R)
             # -------------------------
-            elif label.endswith("::R"):
-                base = label.replace("::R", "")
+            elif str(raw_label).endswith("::R"):
+                base = str(raw_label).replace("::R", "")
 
-                # connect to another pattern if exists
                 for j, p2 in enumerate(patterns):
-                    if j != i:
-                        items2 = np.flatnonzero(p2.items)
-                        labels2 = [predicate_labels[x] for x in items2]
+                    if j == i:
+                        continue
 
-                        if base in labels2:
+                    items2 = np.flatnonzero(p2.items)
+
+                    for it2 in items2:
+                        if str(predicate_labels[it2]) == base:
                             g.add((pattern_node, URIRef(base), pattern_nodes[j]))
 
             # -------------------------
@@ -70,6 +76,6 @@ def build_summary(patterns, predicate_labels):
             # -------------------------
             else:
                 target_node = URIRef(f"http://example.org/node/{item}")
-                g.add((pattern_node, URIRef(label), target_node))
+                g.add((pattern_node, URIRef(raw_label), target_node))
 
     return g, pattern_nodes
