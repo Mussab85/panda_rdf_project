@@ -1,65 +1,36 @@
-# 🧠 PaNDa+ RDF Summary Generator
+# 🐼 PaNDa+ RDF Pattern Mining Dashboard
 
-This project implements **RDF graph summarization** using the **PaNDa+ algorithm**, transforming RDF datasets into compact, interpretable summaries through approximate pattern mining.
+A Streamlit-based implementation of the **PaNDa+ algorithm** for approximate mining patterns from RDF data, including visualization and export tools.
 
 ---
 
 ## 📌 Overview
 
-The pipeline follows three main steps:
+This project implements a **research-oriented version of PaNDa+**, adapted for RDF graphs.
 
-1. **Binary Matrix Mapping**
-   RDF graph → binary matrix (subjects × predicates)
+It allows you to:
 
-2. **Pattern Mining (PaNDa+)**
-   Extract top-k approximate patterns describing the dataset
-
-3. **Summary Graph Construction**
-   Build a compact RDF summary graph and visualize it
-
----
-
-## 🧩 Architecture
-
-### 🔹 Pipeline Overview
-
-![Pipeline](docs/pipeline.png)
+* Load RDF data
+* Convert it into a binary matrix
+* Extract patterns using PaNDa+(A unifying framework for mining approximate top-k binary patterns
+)
+* Visualize patterns as a graph
+* Export results (patterns, subjects, properties)
 
 ---
 
-## 📊 Example Visualization
+## 🚀 How to Run
 
-### 🔹 RDF Summary Graph
+### 1. Clone the repository
 
-![Graph](docs/graph.png)
-
----
-
-## 🚀 Features
-
-* RDF → Binary matrix transformation
-* Support for:
-
-  * Types (`::C`)
-  * Properties
-  * Reverse properties (`::R`)
-* Approximate Top-K pattern mining
-* Pattern size encoded as node size
-* Interactive graph visualization (PyVis)
+```bash
+git clone https://github.com/Mussab85/panda-rdf-project.git
+cd panda-rdf-project
+```
 
 ---
 
-## 🛠️ Tech Stack
-
-* Python
-* NumPy
-* rdflib
-* Streamlit
-* PyVis
-
----
-
-## 📦 Installation
+### 2. Install dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -67,82 +38,159 @@ pip install -r requirements.txt
 
 ---
 
-## ▶️ Run the Application
+### 3. Run the application
 
 ```bash
-python -m streamlit run app.py
+streamlit run app.py
 ```
 
 ---
 
-## 📁 Project Structure
+### 4. Use the app
 
-```
-panda_rdf_project/
-│
-├── app.py
-├── README.md
-├── requirements.txt
-├── .gitignore
-│
-├── panda/
-│   ├── __init__.py
-│   ├── rdf_loader.py
-│   ├── matrix_builder.py
-│   ├── panda_topk.py
-│   ├── summary_builder.py
-│   └── graph_visualizer.py
-│
-├── data/
-├── output/
-└── docs/
-    ├── pipeline.png
-    └── graph.png
-```
+* Upload an RDF file (`.rdf`)
+* Adjust parameters in the sidebar
+* Click **Run PANDA+**
+* View:
+
+  * Extracted patterns
+  * Graph visualization
+  * Debug logs
 
 ---
 
-## 🧠 Pattern Representation
+## ⚙️ Parameters
 
-Each pattern consists of:
-
-* **Items** → predicates (columns)
-* **Transactions** → subjects (rows)
-
-Pattern size is visualized using node size.
+All parameters are controlled from the **Streamlit sidebar**.
 
 ---
 
-## 🎨 Visualization
+### 🔹 `k` — Top-K Patterns
 
-* 🔴 Red nodes → Patterns
-* 🟣 Purple nodes → Classes (`rdf:type`)
-* 🔵 Blue nodes → Other entities
-* Node size → number of subjects
-
----
-
-## 📌 Notes
-
-* This implementation follows a simplified version of the PaNDa+ algorithm
-* Designed for experimentation and visualization
-* Works without schema information
+* **Description**: Maximum number of patterns to extract
+* **Type**: Integer
+* **Default**: `20`
+* **Range**: `1 – 100`
 
 ---
 
-## 📚 Reference
+### 🔹 `epsilon_r` — Row Noise Threshold (εr)
 
-Summarizing linked data RDF graphs using approximate graph pattern mining
-Authors
-Mussab Zneika, Claudio Lucchese, Dan Vodislav, Dimitris Kotzinos
+* **Description**: Controls how tolerant the algorithm is to missing values in rows (subjects)
+* **Effect**:
+
+  * Lower → stricter patterns
+  * Higher → more flexible patterns
+* **Type**: Float
+* **Default**: `0.5`
+* **Range**: `0.0 – 1.0`
+
+---
+
+### 🔹 `epsilon_c` — Column Noise Threshold (εc)
+
+* **Description**: Controls tolerance for missing values in columns (properties)
+* **Effect**:
+
+  * Lower → stricter item consistency
+  * Higher → allows more variation
+* **Type**: Float
+* **Default**: `0.5`
+* **Range**: `0.0 – 1.0`
+
+---
+
+### 🔹 `lambda` — Complexity Penalty (⚠️ Not used in paper mode)
+
+* **Description**: Controls trade-off between pattern size and noise (used in extended versions)
+* **Type**: Float
+* **Default**: `1.0`
+* **Note**:
+
+  * In the **pure PaNDa+ (paper implementation)**, this parameter is **not used**
+  * Included for compatibility with extended versions
+
+---
+
+## 🧠 Algorithm Notes
+
+This implementation follows the **original PaNDa+ paper logic**:
+
+* Uses **XOR-based cost function**
+* Works on a **residual matrix (DR)**
+* Extracts patterns iteratively:
+
+  * Find core
+  * Extend pattern
+  * Update residual
+
+### Important behaviors:
+
+* ✔ Patterns may **share subjects (rows)**
+* ✔ Each **cell (i, j)** is covered only once
+* ✔ Small patterns are filtered for usability
+
+---
+
+## 📊 Output Files
+
+After running, the system generates:
+
+* `patterns.txt` → pattern definitions
+* `subjects.txt` → subject index mapping
+* `properties.txt` → predicate index mapping
+* `graph.html` → interactive visualization
+
+---
+
+## 📈 Visualization
+
+The graph shows:
+
+* Pattern nodes
+* Property nodes
+* Connections between them
+
+Patterns are sized based on their **extent (number of subjects)**.
+
+---
+
+## 🧪 Example Workflow
+
+1. Upload RDF dataset
+2. Run with default parameters
+3. Inspect patterns
+4. Adjust εr / εc for stricter or looser patterns
+5. Export results
+
+---
+
+## ⚠️ Notes
+
+* Very small patterns are automatically filtered:
+
+  * Minimum rows
+  * Minimum items
+  * Minimum area
+* Large datasets may take time to process
+* Results depend heavily on parameter tuning
+
+---
+
+## 📚 References
+
+* PaNDa+ Algorithm (Pattern-based Mining)
+* RDF Graph Mining Techniques
+
 ---
 
 ## 👨‍💻 Author
+
 
 Mussab Zneika
 
 ---
 
-## ⭐ If you like this project
+## ⭐ License
 
-Give it a star on GitHub ⭐
+This project is for academic and research purposes.
