@@ -4,6 +4,14 @@ A Streamlit-based implementation of the **PaNDa+ algorithm** for approximate min
 
 ---
 
+## 📄 Related Publication
+
+This project is based on our published research:
+
+👉 https://hal.science/hal-01418255/document
+
+---
+
 ## 📌 Overview
 
 This project implements a **research-oriented version of PaNDa+**, adapted for RDF graphs.
@@ -12,10 +20,17 @@ It allows you to:
 
 * Load RDF data
 * Convert it into a binary matrix
-* Extract patterns using PaNDa+(A unifying framework for mining approximate top-k binary patterns
-)
+* Extract patterns using **PaNDa+ (A unifying framework for mining approximate top-k binary patterns)**
 * Visualize patterns as a graph
 * Export results (patterns, subjects, properties)
+
+---
+
+## 🖼️ Pipeline
+
+<p align="center">
+  <img src="docs/pipeline.png" width="700">
+</p>
 
 ---
 
@@ -24,8 +39,8 @@ It allows you to:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/Mussab85/panda_rdf_project)
-cd panda-rdf-project
+git clone https://github.com/Mussab85/panda_rdf_project.git
+cd panda_rdf_project
 ```
 
 ---
@@ -51,11 +66,12 @@ streamlit run app.py
 * Upload an RDF file (`.rdf`)
 * Adjust parameters in the sidebar
 * Click **Run PANDA+**
-* View:
 
-  * Extracted patterns
-  * Graph visualization
-  * Debug logs
+You will see:
+
+* Extracted patterns
+* Graph visualization
+* Debug logs
 
 ---
 
@@ -76,7 +92,7 @@ All parameters are controlled from the **Streamlit sidebar**.
 
 ### 🔹 `epsilon_r` — Row Noise Threshold (εr)
 
-* **Description**: Controls how tolerant the algorithm is to missing values in rows (subjects)
+* **Description**: Controls tolerance for missing values in rows (subjects)
 * **Effect**:
 
   * Lower → stricter patterns
@@ -100,12 +116,12 @@ All parameters are controlled from the **Streamlit sidebar**.
 
 ---
 
-### 🔹 `lambda` — Complexity Penalty 
+### 🔹 `lambda` — Complexity Penalty
 
-* **Description**: Controls trade-off between pattern size and noise 
+* **Description**: Controls trade-off between pattern size and noise
 * **Type**: Float
 * **Default**: `1.0`
-* **Note**:
+* **Note**: Not used in the pure PaNDa+ paper implementation (kept for extended versions)
 
 ---
 
@@ -129,17 +145,6 @@ This implementation follows the **original PaNDa+ paper logic**:
 
 ---
 
-## 📊 Output Files
-
-After running, the system generates:
-
-* `patterns.txt` → pattern definitions
-* `subjects.txt` → subject index mapping
-* `properties.txt` → predicate index mapping
-* `graph.html` → interactive visualization
-
----
-
 ## 📈 Visualization
 
 The graph shows:
@@ -149,6 +154,25 @@ The graph shows:
 * Connections between them
 
 Patterns are sized based on their **extent (number of subjects)**.
+
+---
+
+## 🌐 Graph Example
+
+<p align="center">
+  <img src="docs/graph.png" width="800">
+</p>
+
+---
+
+## 📊 Output Files
+
+After running, the system generates:
+
+* `patterns.txt` → pattern definitions
+* `subjects.txt` → subject index mapping
+* `properties.txt` → predicate index mapping
+* `graph.html` → interactive visualization
 
 ---
 
@@ -176,15 +200,48 @@ Patterns are sized based on their **extent (number of subjects)**.
 
 ## 📚 References
 
-* PaNDa+ Algorithm (Pattern-based Mining)
-* RDF Graph Mining Techniques
+### 🔹 RDF Graph Summarization
+
+* **Mussab Zneika**, Claudio Lucchese, Dan Vodislav, Dimitris Kotzinos
+  *RDF Graph Summarization Based on Approximate Patterns*
+  In: **International Workshop on Information Search, Integration, and Personalization (ISIP 2015)**
+  Springer, Cham, 2015, pp. 69–87
+  📅 Publication date: October 1, 2015
+  📊 Citations: 29+
+  🔗 https://hal.science/hal-01418255/document
+
+  **Description:**
+  This work proposes summarizing RDF graphs using **top-K approximate patterns**, generating a schema that reflects the *actually used structure* of the data.
+
+---
+
+### 🔹 PaNDa+ Algorithm
+
+Claudio Lucchese, Salvatore Orlando, and Raﬀaele Perego. A unifying framework for mining approximate top-k binary patterns. IEEE Transactions On Knowledge and Data Engineering, 26(12):2900–2913, 2014. 
+
+---
+
+## 📖 Citation
+
+If you use this project in your research, please cite:
+
+```bibtex
+@inproceedings{zneika2015rdf,
+  author    = {Zneika, Mussab and Lucchese, Claudio and Vodislav, Dan and Kotzinos, Dimitris},
+  title     = {RDF Graph Summarization Based on Approximate Patterns},
+  booktitle = {International Workshop on Information Search, Integration, and Personalization},
+  pages     = {69--87},
+  year      = {2015},
+  publisher = {Springer, Cham},
+  url       = {https://hal.science/hal-01418255/document}
+}
+```
 
 ---
 
 ## 👨‍💻 Author
 
-
-Mussab Zneika
+**Mussab Zneika**
 
 ---
 
