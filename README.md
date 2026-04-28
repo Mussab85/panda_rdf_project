@@ -121,7 +121,6 @@ All parameters are controlled from the **Streamlit sidebar**.
 * **Description**: Controls trade-off between pattern size and noise
 * **Type**: Float
 * **Default**: `1.0`
-* **Note**: Not used in the pure PaNDa+ paper implementation (kept for extended versions)
 
 ---
 
