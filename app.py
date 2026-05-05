@@ -33,7 +33,7 @@ st.sidebar.header("⚙️ Parameters")
 lambda_val = st.sidebar.slider("Lambda", 0.0, 5.0, 1.0)
 epsilon_r = st.sidebar.slider("Row Noise εr", 0.0, 1.0, 0.5)
 epsilon_c = st.sidebar.slider("Column Noise εc", 0.0, 1.0, 0.5)
-k = st.sidebar.number_input("Top-K", 1, 100, 20)
+k = st.sidebar.number_input("Top-K", 1, 500, 20)
 
 min_size = st.sidebar.slider("Min Pattern Size", 0, 2000, 50)
 
