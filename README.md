@@ -1,6 +1,8 @@
 # 🐼 PaNDa+ RDF Pattern Mining Dashboard
 
-A Streamlit-based implementation of the **PaNDa+ algorithm** for approximate mining patterns from RDF data, including visualization and export tools.
+A **Streamlit-based implementation** of the **PaNDa+ algorithm** for
+**approximate mining of top-K patterns from RDF data**, including
+**RDF summarization, visualization, and quality analysis**.
 
 ---
 
@@ -14,15 +16,17 @@ This project is based on our published research:
 
 ## 📌 Overview
 
-This project implements a **research-oriented version of PaNDa+**, adapted for RDF graphs.
+This project implements a **research-oriented adaptation of PaNDa+ for RDF graphs**.
 
 It allows you to:
 
-* Load RDF data
-* Convert it into a binary matrix
-* Extract patterns using **PaNDa+ (A unifying framework for mining approximate top-k binary patterns)**
-* Visualize patterns as a graph
-* Export results (patterns, subjects, properties)
+* Load RDF data (`.rdf`)
+* Transform RDF into a **binary matrix representation**
+* Extract **top-K approximate patterns**
+* Build a **compact RDF summary graph**
+* Visualize patterns interactively
+* Analyze results using **coverage and quality metrics**
+* Export all outputs (patterns, mappings, RDF summary)
 
 ---
 
@@ -31,6 +35,60 @@ It allows you to:
 <p align="center">
   <img src="docs/pipeline.png" width="700">
 </p>
+
+---
+
+## 🧠 How It Works
+
+### 1. RDF Input
+
+The system takes RDF triples:
+
+```text
+(subject, predicate, object)
+```
+
+---
+
+### 2. Matrix Construction
+
+The RDF graph is converted into a **binary matrix**:
+
+* Rows → Subjects
+* Columns → Predicates
+* Value = 1 → subject has that predicate
+
+---
+
+### 3. Pattern Mining (PaNDa+)
+
+The algorithm extracts **top-K approximate patterns**:
+
+* Each pattern = subset of subjects + subset of predicates
+* Allows **controlled noise (εr, εc)**
+* Uses a **residual matrix (DR)**
+* Optimizes an **XOR-based cost function**
+
+---
+
+### 4. RDF Summary
+
+Patterns are transformed into a **semantic RDF summary graph**:
+
+* Pattern → node
+* Predicate → edge
+* `rdf:type` → class nodes
+* Pattern relationships are preserved
+
+---
+
+### 5. Visualization & Analysis
+
+The system provides:
+
+* Interactive graph visualization (PyVis)
+* Pattern statistics and insights
+* Quality metrics (precision, recall, noise)
 
 ---
 
@@ -70,7 +128,8 @@ streamlit run app.py
 You will see:
 
 * Extracted patterns
-* Graph visualization
+* RDF graph visualization
+* Insights (coverage, precision, etc.)
 * Debug logs
 
 ---
@@ -83,64 +142,46 @@ All parameters are controlled from the **Streamlit sidebar**.
 
 ### 🔹 `k` — Top-K Patterns
 
-* **Description**: Maximum number of patterns to extract
-* **Type**: Integer
-* **Default**: `20`
-* **Range**: `1 – 100`
+Maximum number of patterns to extract
+**Default:** `20`
 
 ---
 
-### 🔹 `epsilon_r` — Row Noise Threshold (εr)
+### 🔹 `epsilon_r (εr)` — Row Noise
 
-* **Description**: Controls tolerance for missing values in rows (subjects)
-* **Effect**:
+Controls tolerance for incorrect subjects in patterns
 
-  * Lower → stricter patterns
-  * Higher → more flexible patterns
-* **Type**: Float
-* **Default**: `0.5`
-* **Range**: `0.0 – 1.0`
+* Lower → stricter patterns
+* Higher → more flexible
+
+**Range:** `0.0 – 1.0`
+**Default:** `0.5`
 
 ---
 
-### 🔹 `epsilon_c` — Column Noise Threshold (εc)
+### 🔹 `epsilon_c (εc)` — Column Noise
 
-* **Description**: Controls tolerance for missing values in columns (properties)
-* **Effect**:
+Controls tolerance for missing/spurious predicates
 
-  * Lower → stricter item consistency
-  * Higher → allows more variation
-* **Type**: Float
-* **Default**: `0.5`
-* **Range**: `0.0 – 1.0`
+* Lower → strict patterns
+* Higher → more variation
+
+**Range:** `0.0 – 1.0`
+**Default:** `0.5`
 
 ---
 
 ### 🔹 `lambda` — Complexity Penalty
 
-* **Description**: Controls trade-off between pattern size and noise
-* **Type**: Float
-* **Default**: `1.0`
+Balances pattern size vs noise
+**Default:** `1.0`
 
 ---
 
-## 🧠 Algorithm Notes
+### 🔹 `min_size`
 
-This implementation follows the **original PaNDa+ paper logic**:
-
-* Uses **XOR-based cost function**
-* Works on a **residual matrix (DR)**
-* Extracts patterns iteratively:
-
-  * Find core
-  * Extend pattern
-  * Update residual
-
-### Important behaviors:
-
-* ✔ Patterns may **share subjects (rows)**
-* ✔ Each **cell (i, j)** is covered only once
-* ✔ Small patterns are filtered for usability
+Minimum number of subjects per pattern
+**Default:** `50`
 
 ---
 
@@ -148,11 +189,12 @@ This implementation follows the **original PaNDa+ paper logic**:
 
 The graph shows:
 
-* Pattern nodes
-* Property nodes
-* Connections between them
+* 🔵 Pattern nodes
+* 🟠 Class nodes (`rdf:type`)
+* 🟢 Entity nodes
+* Edges = RDF predicates
 
-Patterns are sized based on their **extent (number of subjects)**.
+Node size reflects **pattern extent (number of subjects)**.
 
 ---
 
@@ -166,12 +208,36 @@ Patterns are sized based on their **extent (number of subjects)**.
 
 ## 📊 Output Files
 
-After running, the system generates:
+After running, results are saved in `/output`:
 
 * `patterns.txt` → pattern definitions
-* `subjects.txt` → subject index mapping
-* `properties.txt` → predicate index mapping
-* `graph.html` → interactive visualization
+* `subjects.txt` → subject mapping
+* `properties.txt` → predicate mapping
+* `summary.ttl` → RDF summary graph
+* `rdf_graph.html` → interactive visualization
+
+---
+
+## 📈 Quality Metrics
+
+The system evaluates pattern quality using:
+
+* **Recall (Coverage)** → how much real RDF data is explained
+* **Precision** → how accurate patterns are
+* **F1 Score** → balance between precision and recall
+* **Noise** → proportion of false positives
+
+⚠️ Coverage is computed on **real RDF facts (1s only)**, not the full matrix.
+
+---
+
+## 🧪 Example Dataset
+
+Generate a dataset with 1000+ triples:
+
+```bash
+python scripts/generate_rdf.py
+```
 
 ---
 
@@ -179,21 +245,19 @@ After running, the system generates:
 
 1. Upload RDF dataset
 2. Run with default parameters
-3. Inspect patterns
-4. Adjust εr / εc for stricter or looser patterns
-5. Export results
+3. Inspect extracted patterns
+4. Adjust εr / εc
+5. Analyze metrics (precision / recall)
+6. Export results
 
 ---
 
 ## ⚠️ Notes
 
-* Very small patterns are automatically filtered:
-
-  * Minimum rows
-  * Minimum items
-  * Minimum area
-* Large datasets may take time to process
-* Results depend heavily on parameter tuning
+* Patterns may **share subjects (overlap is allowed)**
+* Each matrix cell is covered at most once in residual updates
+* Results depend strongly on parameter tuning
+* Large datasets may require more computation time
 
 ---
 
@@ -201,28 +265,23 @@ After running, the system generates:
 
 ### 🔹 RDF Graph Summarization
 
-* **Mussab Zneika**, Claudio Lucchese, Dan Vodislav, Dimitris Kotzinos
-  *RDF Graph Summarization Based on Approximate Patterns*
-  In: **International Workshop on Information Search, Integration, and Personalization (ISIP 2015)**
-  Springer, Cham, 2015, pp. 69–87
-  📅 Publication date: October 1, 2015
-  📊 Citations: 29+
-  🔗 https://hal.science/hal-01418255/document
+**Mussab Zneika**, Claudio Lucchese, Dan Vodislav, Dimitris Kotzinos
+*RDF Graph Summarization Based on Approximate Patterns*
+ISIP 2015, Springer
 
-  **Description:**
-  This work proposes summarizing RDF graphs using **top-K approximate patterns**, generating a schema that reflects the *actually used structure* of the data.
+🔗 https://hal.science/hal-01418255/document
 
 ---
 
 ### 🔹 PaNDa+ Algorithm
 
-Claudio Lucchese, Salvatore Orlando, and Raﬀaele Perego. A unifying framework for mining approximate top-k binary patterns. IEEE Transactions On Knowledge and Data Engineering, 26(12):2900–2913, 2014. 
+Lucchese, Orlando, Perego
+*A Unifying Framework for Mining Approximate Top-K Binary Patterns*
+IEEE TKDE, 2014
 
 ---
 
 ## 📖 Citation
-
-If you use this project in your research, please cite:
 
 ```bibtex
 @inproceedings{zneika2015rdf,
@@ -246,4 +305,4 @@ If you use this project in your research, please cite:
 
 ## ⭐ License
 
-This project is for academic and research purposes.
+This project is intended for **academic and research purposes**.
